@@ -65,7 +65,6 @@ func (s *Service) SetFormulaSteps(
 		context := domain.FormulaChangeContext{
 			Intent:          domain.FormulaChangeSetSteps,
 			ExpectedVersion: input.ExpectedVersion,
-			ReviewRevision:  input.ReviewRevision,
 		}
 		grant, err := domain.EvaluateFormulaChange(formula, context)
 		if err != nil {
@@ -100,7 +99,6 @@ func (s *Service) ApproveFormula(
 		context := domain.FormulaChangeContext{
 			Intent:          domain.FormulaChangeApprove,
 			ExpectedVersion: input.ExpectedVersion,
-			ReviewRevision:  input.ReviewRevision,
 		}
 		grant, err := domain.EvaluateFormulaChange(formula, context)
 		if err != nil {

@@ -24,12 +24,10 @@ const (
 type FormulaChangeContext struct {
 	Intent          FormulaChangeIntent
 	ExpectedVersion *int64
-	ReviewRevision  bool
 }
 
 type FormulaChangeGrant struct {
-	Intent               FormulaChangeIntent
-	AllowApprovedRewrite bool
+	Intent FormulaChangeIntent
 }
 
 type FormulaStep struct {
@@ -171,10 +169,6 @@ func EvaluateFormulaChange(
 	case FormulaDraft:
 		return grant, nil
 	case FormulaApproved:
-		if context.ReviewRevision && context.ExpectedVersion != nil {
-			grant.AllowApprovedRewrite = true
-			return grant, nil
-		}
 		return FormulaChangeGrant{}, NewError(
 			CodeFormulaState,
 			"approved formulas are immutable",
@@ -200,14 +194,13 @@ func (f *Formula) ApplyFormulaChange(
 	if f == nil {
 		return NewError(CodeFormulaState, "formula is required")
 	}
-	if f.State != FormulaDraft && !grant.AllowApprovedRewrite {
+	if f.State != FormulaDraft {
 		return NewError(CodeFormulaState, "formula is not writable")
 	}
 	stamp := now.UTC()
 	switch grant.Intent {
 	case FormulaChangeSetSteps:
-		required := f.State != FormulaDraft
-		if err := ValidateFormulaSteps(steps, required); err != nil {
+		if err := ValidateFormulaSteps(steps, false); err != nil {
 			return err
 		}
 		f.Steps = append([]FormulaStep(nil), steps...)
