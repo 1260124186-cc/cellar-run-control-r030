@@ -8,10 +8,11 @@ import (
 )
 
 type formulaView struct {
-	ID      string               `json:"id"`
-	State   domain.FormulaState  `json:"state"`
-	Version int64                `json:"version"`
-	Steps   []domain.FormulaStep `json:"steps"`
+	ID         string               `json:"id"`
+	State      domain.FormulaState  `json:"state"`
+	Version    int64                `json:"version"`
+	Steps      []domain.FormulaStep `json:"steps"`
+	ApprovedAt *time.Time           `json:"approved_at"`
 }
 
 type vesselView struct {

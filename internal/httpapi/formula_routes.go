@@ -21,10 +21,6 @@ type setStepsRequest struct {
 	Steps []domain.FormulaStep `json:"steps"`
 }
 
-func formulaRevisionReview(expected *int64) bool {
-	return expected != nil
-}
-
 func registerFormulaRoutes(mux *http.ServeMux, app *service.Service) {
 	mux.HandleFunc("POST /v1/formulas", func(response http.ResponseWriter, request *http.Request) {
 		body, err := decodeJSON[createFormulaRequest](response, request)
@@ -77,7 +73,6 @@ func registerFormulaRoutes(mux *http.ServeMux, app *service.Service) {
 		formula, err := app.SetFormulaSteps(request.PathValue("id"),
 			service.SetFormulaStepsInput{
 				ExpectedVersion: expected,
-				ReviewRevision:  formulaRevisionReview(expected),
 				Steps:           body.Steps,
 			})
 		if err != nil {
@@ -95,7 +90,6 @@ func registerFormulaRoutes(mux *http.ServeMux, app *service.Service) {
 		formula, err := app.ApproveFormula(request.PathValue("id"),
 			service.FormulaApprovalInput{
 				ExpectedVersion: expected,
-				ReviewRevision:  formulaRevisionReview(expected),
 			})
 		if err != nil {
 			writeDomainError(response, err)

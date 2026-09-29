@@ -18,13 +18,11 @@ type CreateFormulaInput struct {
 
 type SetFormulaStepsInput struct {
 	ExpectedVersion *int64
-	ReviewRevision  bool
 	Steps           []domain.FormulaStep
 }
 
 type FormulaApprovalInput struct {
 	ExpectedVersion *int64
-	ReviewRevision  bool
 }
 
 type VersionInput struct {

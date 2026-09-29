@@ -94,6 +94,40 @@ func formulaApproval(api *client) error {
 		"approve formula twice"); err != nil {
 		return err
 	}
+
+	rewrittenSteps, err := api.call("PUT", "/v1/formulas/"+formula.ID+"/steps",
+		formulaStepPayload(), ptrInt64(3))
+	if err != nil {
+		return err
+	}
+	if err := requireCode(rewrittenSteps, 409, string(domain.CodeFormulaState),
+		"adjust steps on approved formula"); err != nil {
+		return err
+	}
+
+	immutableResponse, err := api.call("GET", "/v1/formulas/"+formula.ID, nil, nil)
+	if err != nil {
+		return err
+	}
+	if err := requireStatus(immutableResponse, 200, "read formula after rejected changes"); err != nil {
+		return err
+	}
+	var immutable formulaView
+	if err := immutableResponse.decode(&immutable); err != nil {
+		return err
+	}
+	if immutable.State != domain.FormulaApproved || immutable.Version != 3 {
+		return fmt.Errorf("approved formula state or version changed after rejected changes")
+	}
+	if len(immutable.Steps) != 3 || immutable.Steps[0].Label != formula.Steps[0].Label {
+		return fmt.Errorf("approved formula steps were rewritten by rejected changes")
+	}
+	if immutable.ApprovedAt == nil {
+		return fmt.Errorf("approved formula lost its approval timestamp after rejected changes")
+	}
+	if formula.ApprovedAt != nil && !immutable.ApprovedAt.Equal(*formula.ApprovedAt) {
+		return fmt.Errorf("approved formula approval timestamp changed after rejected changes")
+	}
 	return nil
 }
 
